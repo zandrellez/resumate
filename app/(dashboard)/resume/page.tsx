@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ResumeForm, { ResumeSection, StructuredItem, ProjectItem, CredentialItem, ReferenceItem, LanguageItem, StandardItem, SkillCategoryItem } from "@/app/components/ResumeForm";
 
 export default function MasterResumePage() {
@@ -15,6 +15,19 @@ export default function MasterResumePage() {
 
   const [sections, setSections] = useState<ResumeSection[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const paperFrameRef = useRef<HTMLDivElement>(null);
+  const [paperScale, setPaperScale] = useState(1);
+
+  useEffect(() => {
+    const frame = paperFrameRef.current;
+    if (!frame) return;
+
+    const updateScale = () => setPaperScale(Math.min(1, frame.clientWidth / 816));
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
 
   function formatMonthYear(dateString: string) {
     if (!dateString) return "";
@@ -26,8 +39,8 @@ export default function MasterResumePage() {
 
   function estimateItemHeight(section: ResumeSection, item: unknown) {
     const text = Object.values(item as Record<string, unknown>).filter(value => typeof value === "string").join(" ");
-    // Use a conservative line estimate because the preview can be narrower than Letter width.
-    const lines = Math.max(1, Math.ceil(text.length / 45));
+    // The preview uses a fixed 720px text column inside the Letter canvas.
+    const lines = Math.max(1, Math.ceil(text.length / 90));
     return section.type === "structured" || section.type === "projects" ? 31 + lines * 13 : 18 + lines * 13;
   }
 
@@ -69,8 +82,9 @@ export default function MasterResumePage() {
   }
 
   const pages = (() => {
-    // The sheet has 960px of inner height; reserve space for header, footer, and wrapping variance.
-    const pageCapacity = 700;
+    // The fixed Letter canvas has 960px of inner height after 48px margins.
+    // Keep a small reserve for the footer and normal line-height variance.
+    const pageCapacity = 920;
     const result: ResumeSection[][] = [[]];
     let usedHeight = 0;
 
@@ -207,8 +221,12 @@ export default function MasterResumePage() {
           <span className="bg-teal-700 text-white px-2.5 py-1 rounded-md text-[10px]">Page {pageIndex + 1} of {pages.length}</span>
         </div>
 
-        {/* Letter paper: 8.5 x 11 inches at 96 CSS pixels per inch. */}
-        <div className="bg-white border-x border-b border-slate-300 p-[48px] shadow-lg w-full max-w-[816px] h-[1056px] flex flex-col justify-between text-[#000000] font-sans box-border overflow-hidden">
+        {/* Letter paper: preserve the 8.5 x 11 aspect ratio while scaling to the preview column. */}
+        <div ref={paperFrameRef} className="relative w-full max-w-[816px] aspect-[8.5/11]">
+        <div
+          className="absolute left-0 top-0 w-[816px] h-[1056px] bg-white border-x border-b border-slate-300 p-[48px] shadow-lg flex flex-col justify-between text-[#000000] font-sans box-border overflow-hidden origin-top-left"
+          style={{ transform: `scale(${paperScale})` }}
+        >
           <div className="space-y-4 pr-1">
             {/* Personal Info Header */}
             {pageIndex === 0 && <div className="border-b border-slate-400 pb-3 text-center space-y-1">
@@ -231,6 +249,7 @@ export default function MasterResumePage() {
           <div className="text-center text-[10px] text-slate-400 border-t border-slate-200 pt-2 mt-2">
             Page {pageIndex + 1} of {pages.length}
           </div>
+        </div>
         </div>
 
         {pages.length > 1 && <div className="flex items-center gap-4 mt-4" aria-label="Preview page navigation">
