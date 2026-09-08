@@ -64,16 +64,11 @@ const AVAILABLE_SECTIONS = [
   { title: "Experience", type: "structured" },
   { title: "Education", type: "structured" },
   { title: "Projects", type: "projects" },
-  { title: "Extracurricular Activities", type: "structured" },
-  { title: "Additional Experience", type: "structured" },
-  { title: "Volunteering", type: "structured" },
   { title: "Technical Skills & Competencies", type: "skills" },
   { title: "Summary or Objective", type: "standard" },
   { title: "Certifications & Licenses", type: "credentials" },
   { title: "Awards", type: "credentials" },
   { title: "Languages", type: "languages" },
-  { title: "Publications & Research", type: "standard" },
-  { title: "Hobbies", type: "standard" },
   { title: "References", type: "references" },
   { title: "Affiliations", type: "structured" },
   { title: "Custom Section (Simple)", type: "standard" },
@@ -92,6 +87,7 @@ interface ResumeFormProps {
   setPersonalInfo: React.Dispatch<React.SetStateAction<any>>;
   sections: ResumeSection[];
   setSections: React.Dispatch<React.SetStateAction<ResumeSection[]>>;
+  onFileUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function ResumeForm({
@@ -99,6 +95,7 @@ export default function ResumeForm({
   setPersonalInfo,
   sections,
   setSections,
+  onFileUpload,
 }: ResumeFormProps) {
   const [openAccordion, setOpenAccordion] = useState<string | null>("experience");
   const [editingHeaderId, setEditingHeaderId] = useState<string | null>(null);
@@ -225,7 +222,7 @@ export default function ResumeForm({
         <input 
           type="file" 
           accept="application/pdf"
-          onChange={handleFileUpload}
+          onChange={onFileUpload}
           className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#0F172A] file:text-white hover:file:bg-slate-800 cursor-pointer"
         />
       </div>
