@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     // 5. Save the tailored entry into the job applications tracking table
     const { error: insertError } = await supabase
-      .from("job_applications")
+      .from("applications")
       .insert({
         user_id: user.id,
         company: companyName || "Target Company",

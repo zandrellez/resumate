@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import ResumePreview from "@/app/components/ResumePreview";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -14,7 +15,7 @@ export default function Home() {
   const [roleTitle, setRoleTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tailoredResume, setTailoredResume] = useState("");
+  const [tailoredData, setTailoredData] = useState<{ personalInfo: any; sections: any[] } | null>(null);
 
   const handleUrlScrape = async () => {
     if (!jobUrl) return;
@@ -71,7 +72,7 @@ export default function Home() {
       if (data.error) {
         alert(data.error);
       } else {
-        setTailoredResume(data.tailoredResume);
+        setTailoredData(data.tailoredResume);
       }
     } catch (err) {
       console.error(err);
@@ -163,45 +164,50 @@ export default function Home() {
         )}
       </div>
 
-      <div className="md:col-span-5 flex justify-center w-full">
-        {tailoredResume ? (
-          <div className="w-full bg-white border border-slate-200 p-6 rounded-3xl shadow-md space-y-4 max-h-[600px] flex flex-col">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-[#0F172A]">Tailored Resume Output</h3>
-              <button 
-                onClick={() => navigator.clipboard.writeText(tailoredResume)}
-                className="text-xs bg-teal-50 text-[#0D9488] font-semibold px-3 py-1.5 rounded-lg hover:bg-teal-100 transition"
-              >
-                Copy Markdown
-              </button>
+      <div className="md:col-span-12 w-full">
+        {tailoredData ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl shadow-sm max-w-7xl mx-auto">
+              <div>
+                <h3 className="text-base font-bold text-[#0F172A]">Tailored Resume Preview</h3>
+                <p className="text-xs text-slate-500">Optimized specifically for your target role requirements.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                
+                <button 
+                  onClick={() => setTailoredData(null)}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition"
+                >
+                  Tailor Another
+                </button>
+              </div>
             </div>
-            <pre className="flex-1 overflow-y-auto text-xs text-slate-700 whitespace-pre-wrap font-mono bg-slate-50 p-4 rounded-xl border border-slate-200">
-              {tailoredResume}
-            </pre>
-            <button 
-              onClick={() => setTailoredResume("")}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl transition"
-            >
-              Tailor Another
-            </button>
+
+            {/* Reusable ATS Preview Component */}
+            <ResumePreview 
+              personalInfo={tailoredData.personalInfo} 
+              sections={tailoredData.sections} 
+            />
           </div>
         ) : (
-          <div className="w-full h-80 bg-gradient-to-br from-slate-100 to-slate-200/50 border border-slate-200/60 rounded-3xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden">
-            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-xs">
-                AI
+          <div className="md:col-span-5 flex justify-center w-full">
+            <div className="w-full h-80 bg-gradient-to-br from-slate-100 to-slate-200/50 border border-slate-200/60 rounded-3xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden">
+              <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-xs">
+                  AI
+                </div>
+                <div className="text-sm font-bold text-slate-800">Match Optimization Ready</div>
+                <p className="text-xs text-slate-500">Real-time keyword scoring and ATS alignment engine.</p>
               </div>
-              <div className="text-sm font-bold text-slate-800">Match Optimization Ready</div>
-              <p className="text-xs text-slate-500">Real-time keyword scoring and ATS alignment engine.</p>
-            </div>
-            <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-2 shadow-sm">
-              <div className="flex justify-between text-xs font-semibold text-slate-700">
-                <span>Target Match Score</span>
-                <span className="text-[#0D9488]">94%</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-[#0D9488] h-full w-[94%]" />
+              <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-2 shadow-sm">
+                <div className="flex justify-between text-xs font-semibold text-slate-700">
+                  <span>Target Match Score</span>
+                  <span className="text-[#0D9488]">94%</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div className="bg-[#0D9488] h-full w-[94%]" />
+                </div>
               </div>
             </div>
           </div>
